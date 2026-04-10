@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Doctor Medication Log - CoopVet</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 40px;
+      background-color: #f0f8ff;
+      color: #333;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 30px;
+      border-bottom: 3px solid #003366;
+      padding-bottom: 20px;
+    }
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .logo-img {
+      height: 70px;
+      width: auto;
+    }
+    .header-title {
+      color: #003366;
+      margin: 0;
+      font-size: 2rem;
+    }
+    .back-btn {
+      padding: 10px 20px;
+      background-color: #003366;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 600;
+      transition: background-color 0.2s;
+    }
+    .back-btn:hover {
+      background-color: #00509d;
+    }
+    .form-card {
+      background: #f8fbff;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #b0c4de;
+      margin-bottom: 25px;
+    }
+    h2, h3 {
+      color: #003366;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+    .input-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    input, select {
+      padding: 10px;
+      border: 1px solid #b0c4de;
+      border-radius: 4px;
+      flex: 1;
+      min-width: 180px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #003366;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background-color: #00509d;
+    }
+    .status-box {
+      background: #eef6ff;
+      border: 1px solid #b0c4de;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .success {
+      background: #e8f5e9;
+      border-color: #a5d6a7;
+      color: #2e7d32;
+    }
+    .error {
+      background: #ffebee;
+      border-color: #ef9a9a;
+      color: #c62828;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 15px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 14px;
+      text-align: left;
+      border-bottom: 1px solid #e1e8ed;
+    }
+    th {
+      background-color: #003366;
+      color: white;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.85em;
+      letter-spacing: 1px;
+    }
+    tr:nth-child(even) {
+      background-color: #f8fbff;
+    }
+    .small {
+      font-size: 0.9em;
+      color: #555;
+    }
+    .empty {
+      text-align: center;
+      color: #888;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo-section">
+        <img src="CoopVet.png" alt="CoopVet Logo" class="logo-img">
+        <h1 class="header-title">Doctor Daily Medication Log</h1>
+      </div>
+    </div>
+
+    <div id="messageBox" class="status-box" style="display: none;"></div>
+
+    <div class="form-card">
+      <h2>Log Medication Usage</h2>
+      <div class="input-row">
+        <select id="doctorName" style="padding: 10px; border: 1px solid #b0c4de; border-radius: 4px; flex: 1; min-width: 150px;">
+          <option value="">Select Staff Name</option>
+          <option value="Tito Estrongmane">Tito Estrongmane</option>
+          <option value="Inacia Telma">Inacia Telma</option>
+          <option value="Pedro Antunes">Pedro Antunes</option>
+          <option value="Joyce Antunes">Joyce Antunes</option>
+          <option value="Carmen do Rosario">Carmen do Rosario</option>
+        </select>
+        <div style="flex: 2; min-width: 250px; display: flex; flex-direction: column; gap: 5px;">
+          <input type="text" id="medSearch" placeholder="Search medication..." onkeyup="filterMeds()" style="width: 600px;">
+          <select id="usedMed" style="padding: 10px; border: 1px solid #b0c4de; border-radius: 4px; width: 100%;">
+            <option value="">Select Medication</option>
+          </select>
+        </div>
+      </div>
+      <div class="input-row">
+        <input type="number" step="0.01" id="usedAmount" placeholder="Amount Used">
+        <input type="date" id="dateUsed">
+        <button onclick="logUsage()">Save Daily Usage</button>
+      </div>
+      <div id="selectedMedInfo" class="small"></div>
+    </div>
+
+  </div>
+
+  <script>
+    let stock = JSON.parse(localStorage.getItem('medical_stock') || '[]');
+    let usage = JSON.parse(localStorage.getItem('medical_usage') || '[]');
+
+    document.getElementById('dateUsed').valueAsDate = new Date();
+
+    function saveData() {
+      localStorage.setItem('medical_stock', JSON.stringify(stock));
+      localStorage.setItem('medical_usage', JSON.stringify(usage));
+    }
+
+    function showMessage(text, type) {
+      const box = document.getElementById('messageBox');
+      box.className = `status-box ${type}`;
+      box.textContent = text;
+      box.style.display = 'block';
+    }
+
+    function populateMedicationList() {
+      // Sort stock alphabetically
+      stock.sort((a, b) => a.name.localeCompare(b.name));
+      filterMeds();
+    }
+
+    function filterMeds() {
+      const search = document.getElementById('medSearch').value.toLowerCase();
+      const medSelect = document.getElementById('usedMed');
+      const currentSelection = medSelect.value;
+      
+      medSelect.innerHTML = '<option value="">Select Medication</option>';
+
+      stock.forEach(item => {
+        if (item.name.toLowerCase().includes(search)) {
+          const option = document.createElement('option');
+          option.value = item.name;
+          option.textContent = `${item.name} (${item.qty} ${item.unit || 'pills'} left)`;
+          if (item.name === currentSelection) option.selected = true;
+          medSelect.appendChild(option);
+        }
+      });
+    }
+
+    function updateMedicationInfo() {
+      const medName = document.getElementById('usedMed').value;
+      const info = document.getElementById('selectedMedInfo');
+
+      if (!medName) {
+        info.textContent = '';
+        return;
+      }
+
+      const med = stock.find(item => item.name === medName);
+
+      if (!med) {
+        info.textContent = '';
+        return;
+      }
+
+      info.textContent = `Available stock: ${med.qty} ${med.unit || 'pills'} | Minimum required: ${med.min || 0}`;
+    }
+
+    function logUsage() {
+      const doctorName = document.getElementById('doctorName').value.trim();
+      const medName = document.getElementById('usedMed').value;
+      const amount = parseFloat(document.getElementById('usedAmount').value);
+      const date = document.getElementById('dateUsed').value;
+
+      if (!doctorName || !medName || isNaN(amount) || amount <= 0 || !date) {
+        showMessage('Fill all fields correctly.', 'error');
+        return;
+      }
+
+      const medIndex = stock.findIndex(item => item.name === medName);
+
+      if (medIndex === -1) {
+        showMessage('Medication not found in stock.', 'error');
+        return;
+      }
+
+      if (stock[medIndex].qty < amount) {
+        showMessage(`Not enough stock. Current stock: ${stock[medIndex].qty} ${stock[medIndex].unit || 'pills'}.`, 'error');
+        return;
+      }
+
+      stock[medIndex].qty = parseFloat((stock[medIndex].qty - amount).toFixed(2));
+
+      usage.push({
+        user: doctorName,
+        med: medName,
+        amount: amount,
+        unit: stock[medIndex].unit || 'pills',
+        date: date
+      });
+
+      saveData();
+      populateMedicationList();
+      updateMedicationInfo();
+
+      document.getElementById('doctorName').value = '';
+      document.getElementById('usedMed').value = '';
+      document.getElementById('medSearch').value = '';
+      document.getElementById('usedAmount').value = '';
+      document.getElementById('dateUsed').valueAsDate = new Date();
+
+      showMessage(`${medName} logged successfully. Remaining stock: ${stock[medIndex].qty} ${stock[medIndex].unit || 'pills'}.`, 'success');
+    }
+
+    document.getElementById('usedMed').addEventListener('change', updateMedicationInfo);
+
+    populateMedicationList();
+  </script>
+</body>
+</html>
