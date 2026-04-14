@@ -4,177 +4,58 @@
   <meta charset="UTF-8">
   <title>Medical Records - CoopVet</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
   <style>
-    body { 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-      padding: 40px; 
-      background-color: #f0f8ff; 
-      color: #333; 
-      line-height: 1.6;
-    }
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-      background: white;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 30px;
-      border-bottom: 3px solid #003366;
-      padding-bottom: 20px;
-    }
-    .logo-img {
-      height: 70px;
-      width: auto;
-    }
-    .logo-section {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-    .logo-placeholder {
-      font-size: 2.5em;
-      font-weight: bold;
-      color: #003366;
-      font-family: 'Arial Black', sans-serif;
-    }
-    .logo-placeholder span {
-      color: #00509d;
-    }
-    h2, h3 { 
-      color: #003366; 
-      margin-top: 40px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    h2:first-of-type { margin-top: 0; }
-    .back-btn {
-      padding: 10px 20px; 
-      background-color: #003366; 
-      color: white; 
-      border: none; 
-      border-radius: 4px; 
-      cursor: pointer; 
-      text-decoration: none;
-      font-weight: 600;
-      transition: background-color 0.2s;
-    }
-    .back-btn:hover { 
-      background-color: #00509d; 
-    }
-    .export-btn {
-      padding: 10px 20px; 
-      background-color: #2e8b57; 
-      color: white; 
-      border: none; 
-      border-radius: 4px; 
-      cursor: pointer; 
-      font-weight: 600;
-      transition: background-color 0.2s;
-      margin-left: 10px;
-    }
-    .export-btn:hover {
-      background-color: #3cb371;
-    }
-    .action-cell {
-      text-align: center;
-      white-space: nowrap;
-    }
-    .delete-btn {
-      padding: 8px 12px;
-      background-color: #c62828;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    .delete-btn:hover {
-      background-color: #b71c1c;
-    }
-    table { 
-      border-collapse: collapse;
-      width: 100%; 
-      margin-top: 15px; 
-      border-radius: 4px;
-      overflow: hidden;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    }
-    th, td { 
-      padding: 15px; 
-      text-align: left; 
-      border-bottom: 1px solid #e1e8ed;
-    }
-    th { 
-      background-color: #003366; 
-      color: white; 
-      font-weight: 600;
-      text-transform: uppercase;
-      font-size: 0.85em;
-      letter-spacing: 1px;
-    }
-    tr:nth-child(even) { 
-      background-color: #f8fbff; 
-    }
-    tr:hover {
-      background-color: #eef6ff;
-    }
-    .status-badge {
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 0.8em;
-      font-weight: 600;
-      display: inline-block;
-    }
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; background-color: #f0f8ff; color: #333; line-height: 1.6; }
+    .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    .header { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 30px; border-bottom: 3px solid #003366; padding-bottom: 20px; }
+    .logo-section { display: flex; align-items: center; gap: 15px; }
+    .logo-img { height: 70px; width: auto; }
+    .header-title { color: #003366; margin: 0; font-size: 1.8rem; }
+    .actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .back-btn, .export-btn { padding: 10px 20px; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; text-decoration: none; transition: background-color 0.2s; }
+    .back-btn { background-color: #003366; }
+    .back-btn:hover { background-color: #00509d; }
+    .export-btn { background-color: #2e8b57; }
+    .export-btn:hover { background-color: #3cb371; }
+    .notification-banner { background-color: #fff3e0; border: 1px solid #ffe0b2; padding: 15px; border-radius: 4px; margin-bottom: 20px; color: #e65100; display: none; font-weight: 500; }
+    .section-title { color: #003366; margin-top: 40px; display: flex; justify-content: space-between; align-items: center; }
+    .section-title:first-of-type { margin-top: 0; }
+    table { border-collapse: collapse; width: 100%; margin-top: 15px; border-radius: 4px; overflow: hidden; }
+    th, td { padding: 14px; text-align: left; border-bottom: 1px solid #e1e8ed; }
+    th { background-color: #003366; color: white; font-weight: 600; text-transform: uppercase; font-size: 0.8em; letter-spacing: 1px; }
+    tr:nth-child(even) { background-color: #f8fbff; }
+    tr:hover { background-color: #eef6ff; }
+    .status-badge { padding: 4px 10px; border-radius: 12px; font-size: 0.8em; font-weight: 600; display: inline-block; }
     .status-green { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #2e7d32; }
     .status-yellow { background-color: #fffde7; color: #f57f17; border: 1px solid #f57f17; }
     .status-red { background-color: #ffebee; color: #c62828; border: 1px solid #c62828; }
-    
-    .notification-banner {
-      background-color: #fff3e0;
-      border: 1px solid #ffe0b2;
-      padding: 15px;
-      border-radius: 4px;
-      margin-bottom: 20px;
-      color: #e65100;
-      display: none;
-      font-weight: 500;
-    }
-    .count-badge {
-      background: #003366;
-      color: white;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.6em;
-    }
-    @media print {
-      .back-btn { display: none; }
-      body { padding: 0; background: white; }
-      .container { box-shadow: none; max-width: 100%; }
-    }
+    .count-badge { background: #003366; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.6em; }
+    .action-cell { text-align: center; white-space: nowrap; }
+    .delete-btn { padding: 6px 12px; background-color: #c62828; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; }
+    .delete-btn:hover { background-color: #b71c1c; }
+    .loading { text-align: center; padding: 40px; color: #666; }
+    @media print { .no-print, .back-btn, .export-btn, .action-cell { display: none !important; } body { padding: 0; background: white; } .container { box-shadow: none; max-width: 100%; } }
   </style>
 </head>
 <body>
 
 <div class="container">
   <div id="alertBanner" class="notification-banner"></div>
+
   <div class="header">
     <div class="logo-section">
       <img src="CoopVet.png" alt="CoopVet Logo" class="logo-img">
+      <h1 class="header-title">Medical Records</h1>
     </div>
-    <div class="actions">
+    <div class="actions no-print">
       <a href="index.html" class="back-btn">← Back to Management</a>
       <button class="export-btn" onclick="exportExcel()">Export to Excel</button>
     </div>
   </div>
 
-  <h2>
+  <h2 class="section-title">
     Medication Stock Records
     <span id="stockCount" class="count-badge">0 Items</span>
   </h2>
@@ -187,213 +68,154 @@
         <th>Unit</th>
         <th>Min. Boxes</th>
         <th>Status</th>
-        <th class="action-cell">Manage</th>
+        <th class="action-cell no-print">Manage</th>
       </tr>
     </thead>
     <tbody></tbody>
   </table>
 
-  <h3>
+  <h3 class="section-title">
     Complete Usage Log
     <span id="usageCount" class="count-badge">0 Entries</span>
   </h3>
   <table id="usageTable">
     <thead>
       <tr>
-        <th>User</th>
+        <th>Staff Name</th>
         <th>Medication</th>
         <th>Amount Used</th>
         <th>Date Recorded</th>
-        <th class="action-cell">Manage</th>
+        <th class="action-cell no-print">Manage</th>
       </tr>
     </thead>
     <tbody></tbody>
   </table>
+
+  <div id="loadingScreen" class="loading">🔄 Loading records...</div>
 </div>
 
 <script>
-function loadData() {
-  const stock = JSON.parse(localStorage.getItem('medical_stock') || '[]');
-  const usage = JSON.parse(localStorage.getItem('medical_usage') || '[]');
+const SUPABASE_URL = 'https://uoxuuthnxhuaqqplizpl.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVveHV0aG54aHVhYXFxcGxpenBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk2MjY0MTYsImV4cCI6MjA2NTE0MjQxNn0.YW5ZL-BRZgA2cGMzMEc5s6e3VZ9q6MLxmpuRLMN7pB8';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  renderStock(stock);
-  renderUsage(usage);
-}
+function fqty(v) { return Number.isInteger(v) ? v : parseFloat(v.toFixed(2)); }
 
-function formatQty(value) {
-  return Number.isInteger(value) ? value : parseFloat(value.toFixed(2));
+async function loadData() {
+  document.getElementById('loadingScreen').style.display = 'block';
+  const [stockRes, usageRes] = await Promise.all([
+    supabase.from('stock').select('*').order('name'),
+    supabase.from('usage_log').select('*').order('date', { ascending: false })
+  ]);
+  renderStock(stockRes.data || []);
+  renderUsage(usageRes.data || []);
+  document.getElementById('loadingScreen').style.display = 'none';
 }
 
 function renderStock(stock) {
   const tbody = document.querySelector('#stockTable tbody');
   const alertBanner = document.getElementById('alertBanner');
   document.getElementById('stockCount').innerText = `${stock.length} Items`;
-  tbody.innerHTML = "";
-  
+  tbody.innerHTML = '';
   let lowStockMeds = [];
 
-  if (stock.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#999;">No stock data available</td></tr>';
-    return;
-  }
+  if (!stock.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#999;">No stock data available</td></tr>'; return; }
 
   stock.forEach(item => {
-    const minBoxes = item.minBoxes ?? item.min ?? 0;
-    const packsPerBox = item.packaging?.packsPerBox ?? item.packaging?.cardsPerBox ?? 1;
-    const unitsPerPack = item.packaging?.unitsPerPack ?? item.packaging?.unitsPerCard ?? 1;
-    const totalUnitsPerBox = packsPerBox * unitsPerPack;
-    const currentBoxes = totalUnitsPerBox ? item.qty / totalUnitsPerBox : 0;
-    const wholeBoxes = totalUnitsPerBox ? Math.floor(currentBoxes) : 0;
-    const remainingAfterBoxes = totalUnitsPerBox ? item.qty - (wholeBoxes * totalUnitsPerBox) : item.qty;
+    const minBoxes = item.min_boxes || 0;
+    const ppb = item.packs_per_box || 1;
+    const upp = item.units_per_pack || 1;
+    const totalPerBox = ppb * upp;
+    const currentBoxes = totalPerBox ? item.qty / totalPerBox : 0;
+    const wholeBoxes = totalPerBox ? Math.floor(currentBoxes) : 0;
+    const remaining = totalPerBox ? item.qty - wholeBoxes * totalPerBox : item.qty;
     const packLabel = item.unit === 'ml' ? 'Bottle(s)' : 'Card(s)';
-    const packsLeft = unitsPerPack ? Math.floor(remainingAfterBoxes / unitsPerPack) : 0;
-    const looseUnits = unitsPerPack ? remainingAfterBoxes - (packsLeft * unitsPerPack) : remainingAfterBoxes;
-    const breakdownStr = item.unit === 'ml'
-      ? `${formatQty(wholeBoxes)} Box(es) ${formatQty(remainingAfterBoxes)} ml`
-      : `${formatQty(wholeBoxes)} Box(es) ${formatQty(packsLeft)} ${packLabel} ${formatQty(looseUnits)} ${item.unit || 'units'}`;
+    const packsLeft = upp ? Math.floor(remaining / upp) : 0;
+    const loose = upp ? remaining - packsLeft * upp : remaining;
+    const breakdown = item.unit === 'ml'
+      ? `${fqty(wholeBoxes)} Box(es) ${fqty(remaining)} ml`
+      : `${fqty(wholeBoxes)} Box(es) ${fqty(packsLeft)} ${packLabel} ${fqty(loose)} ${item.unit || 'units'}`;
 
-    let status = 'Adequate';
-    let statusClass = 'status-green';
+    let status = 'Adequate', statusClass = 'status-green';
+    if (currentBoxes <= minBoxes * 0.1) { status = 'Critical (Red)'; statusClass = 'status-red'; lowStockMeds.push(`${item.name} (${fqty(currentBoxes)}/${fqty(minBoxes)} boxes)`); }
+    else if (currentBoxes <= minBoxes * 0.5) { status = 'Low (Yellow)'; statusClass = 'status-yellow'; lowStockMeds.push(`${item.name} (${fqty(currentBoxes)}/${fqty(minBoxes)} boxes)`); }
+    else if (currentBoxes >= minBoxes) { status = 'Ideal (Green)'; statusClass = 'status-green'; }
 
-    if (currentBoxes <= (minBoxes * 0.1)) {
-      status = 'Critical (Red)';
-      statusClass = 'status-red';
-      lowStockMeds.push(`${item.name} (${formatQty(currentBoxes)}/${formatQty(minBoxes)} boxes)`);
-    } else if (currentBoxes <= (minBoxes * 0.5)) {
-      status = 'Low (Yellow)';
-      statusClass = 'status-yellow';
-      lowStockMeds.push(`${item.name} (${formatQty(currentBoxes)}/${formatQty(minBoxes)} boxes)`);
-    } else if (currentBoxes >= minBoxes) {
-      status = 'Ideal (Green)';
-      statusClass = 'status-green';
-    }
-
-    tbody.innerHTML += `
-      <tr>
-        <td><strong>${item.name}</strong></td>
-        <td>${formatQty(item.qty)}</td>
-        <td style="font-size: 0.85em; color: #555;">${breakdownStr}</td>
-        <td>${item.unit || 'pills'}</td>
-        <td>${formatQty(minBoxes)}</td>
-        <td><span class="status-badge ${statusClass}">${status}</span></td>
-        <td class="action-cell">
-          <button class="delete-btn" onclick="deleteMedication('${item.name.replace(/'/g, "\\'")}')">Delete</button>
-        </td>
-      </tr>`;
+    tbody.innerHTML += `<tr>
+      <td><strong>${item.name}</strong></td>
+      <td>${fqty(item.qty)}</td>
+      <td style="font-size:0.85em; color:#555;">${breakdown}</td>
+      <td>${item.unit || 'pills'}</td>
+      <td>${fqty(minBoxes)}</td>
+      <td><span class="status-badge ${statusClass}">${status}</span></td>
+      <td class="action-cell no-print"><button class="delete-btn" onclick="deleteStock(${item.id})">Delete</button></td>
+    </tr>`;
   });
 
-  if (lowStockMeds.length > 0) {
-    alertBanner.style.display = 'block';
-    alertBanner.innerHTML = `⚠️ <strong>Order Required:</strong> The following medications are running low: ${[...new Set(lowStockMeds)].join(', ')}. Please request a restock.`;
-  } else {
-    alertBanner.style.display = 'none';
-  }
+  alertBanner.style.display = lowStockMeds.length ? 'block' : 'none';
+  alertBanner.innerHTML = `⚠️ <strong>Order Required:</strong> ${lowStockMeds.join(', ')}. Please request a restock.`;
 }
 
 function renderUsage(usage) {
   const tbody = document.querySelector('#usageTable tbody');
   document.getElementById('usageCount').innerText = `${usage.length} Entries`;
-  tbody.innerHTML = "";
-
-  if (usage.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">No usage entries found</td></tr>';
-    return;
-  }
-
-  [...usage].reverse().forEach((u, reversedIndex) => {
-    const amount = u.amount !== undefined ? u.amount : 1;
-    const unit = u.unit || 'pills';
-    const originalIndex = usage.length - 1 - reversedIndex;
-
-    tbody.innerHTML += `
-      <tr>
-        <td>${u.user}</td>
-        <td>${u.med}</td>
-        <td>${amount} ${unit}</td>
-        <td>${new Date(u.date).toLocaleDateString()}</td>
-        <td class="action-cell">
-          <button class="delete-btn" onclick="deleteUsage(${originalIndex})">Delete</button>
-        </td>
-      </tr>`;
+  tbody.innerHTML = '';
+  if (!usage.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">No usage entries found</td></tr>'; return; }
+  usage.forEach(u => {
+    tbody.innerHTML += `<tr>
+      <td>${u.staff_name}</td>
+      <td>${u.med}</td>
+      <td>${u.amount !== undefined ? fqty(u.amount) : 1} ${u.unit || 'pills'}</td>
+      <td>${new Date(u.date).toLocaleDateString()}</td>
+      <td class="action-cell no-print"><button class="delete-btn" onclick="deleteUsage(${u.id})">Delete</button></td>
+    </tr>`;
   });
 }
 
-function deleteMedication(medName) {
-  if (!medName) return;
-
-  if (!confirm(`Delete ${medName} from stock?`)) return;
-
-  const stock = JSON.parse(localStorage.getItem('medical_stock') || '[]');
-  const updatedStock = stock.filter(item => item.name !== medName);
-
-  localStorage.setItem('medical_stock', JSON.stringify(updatedStock));
-  loadData();
+async function deleteStock(id) {
+  if (!confirm('Delete this medication from stock?')) return;
+  await supabase.from('stock').delete().eq('id', id);
+  await loadData();
 }
 
-function deleteUsage(index) {
-  const usage = JSON.parse(localStorage.getItem('medical_usage') || '[]');
-
-  if (index < 0 || index >= usage.length) return;
+async function deleteUsage(id) {
   if (!confirm('Delete this usage entry?')) return;
-
-  usage.splice(index, 1);
-  localStorage.setItem('medical_usage', JSON.stringify(usage));
-  loadData();
+  await supabase.from('usage_log').delete().eq('id', id);
+  await loadData();
 }
 
-function exportExcel() {
-  const stock = JSON.parse(localStorage.getItem('medical_stock') || '[]');
-  const usage = JSON.parse(localStorage.getItem('medical_usage') || '[]');
+async function exportExcel() {
+  const [stockRes, usageRes] = await Promise.all([supabase.from('stock').select('*'), supabase.from('usage_log').select('*')]);
+  const stock = stockRes.data || [], usage = usageRes.data || [];
   const wb = XLSX.utils.book_new();
 
   const stockData = stock.map(s => {
-    const minBoxes = s.minBoxes ?? s.min ?? 0;
-    const packsPerBox = s.packaging?.packsPerBox ?? s.packaging?.cardsPerBox ?? 1;
-    const unitsPerPack = s.packaging?.unitsPerPack ?? s.packaging?.unitsPerCard ?? 1;
-    const totalUnitsPerBox = packsPerBox * unitsPerPack;
-    const currentBoxes = totalUnitsPerBox ? s.qty / totalUnitsPerBox : 0;
-    const status = currentBoxes <= minBoxes * 0.1 ? 'Critical (Red)' : currentBoxes <= minBoxes * 0.5 ? 'Low (Yellow)' : currentBoxes >= minBoxes ? 'Ideal (Green)' : 'Adequate';
-
-    return {
-      Medication: s.name,
-      'Total Units': formatQty(s.qty),
-      'Current Boxes': formatQty(currentBoxes),
-      'Units per Box': formatQty(totalUnitsPerBox),
-      Unit: s.unit || 'pills',
-      'Min. Boxes': formatQty(minBoxes),
-      Status: status
-    };
+    const ppb = s.packs_per_box || 1, upp = s.units_per_pack || 1;
+    const totalPerBox = ppb * upp;
+    const currentBoxes = totalPerBox ? s.qty / totalPerBox : 0;
+    const status = currentBoxes <= s.min_boxes * 0.1 ? 'Critical (Red)' : currentBoxes <= s.min_boxes * 0.5 ? 'Low (Yellow)' : currentBoxes >= s.min_boxes ? 'Ideal (Green)' : 'Adequate';
+    return { Medication: s.name, 'Total Units': fqty(s.qty), 'Current Boxes': fqty(currentBoxes), 'Units per Box': fqty(totalPerBox), Unit: s.unit || 'pills', 'Min. Boxes': fqty(s.min_boxes || 0), Status: status };
   });
 
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(stockData), 'Current Stock');
-
-  const usageByMonth = usage.reduce((groups, u) => {
-    const date = new Date(u.date);
-    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-
-    if (!groups[monthKey]) groups[monthKey] = [];
-
-    groups[monthKey].push({
-      Date: date.toLocaleDateString(),
-      User: u.user,
-      Medication: u.med,
-      'Amount Used': u.amount !== undefined ? u.amount : 1,
-      Unit: u.unit || 'pills'
-    });
-
-    return groups;
+  const usageByMonth = usage.reduce((g, u) => {
+    const d = new Date(u.date);
+    const mk = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    if (!g[mk]) g[mk] = [];
+    g[mk].push({ Date: d.toLocaleDateString(), 'Staff Name': u.staff_name, Medication: u.med, 'Amount Used': fqty(u.amount || 1), Unit: u.unit || 'pills' });
+    return g;
   }, {});
 
-  Object.keys(usageByMonth).sort().forEach(monthKey => {
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(usageByMonth[monthKey]), monthKey);
-  });
-
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(stockData), 'Current Stock');
+  Object.keys(usageByMonth).sort().forEach(mk => XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(usageByMonth[mk]), mk));
   XLSX.writeFile(wb, 'CoopVet_Medical_Report.xlsx');
 }
 
-// Initial load
+supabase.channel('db_changes')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'stock' }, () => loadData())
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'usage_log' }, () => loadData())
+  .subscribe();
+
 loadData();
 </script>
-
 </body>
 </html>

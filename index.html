@@ -2,144 +2,28 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Medical Stock Manager</title>
+  <title>Medical Stock Manager - CoopVet</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
   <style>
-    body { 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-      padding: 40px; 
-      background-color: #f0f8ff; 
-      color: #333; 
-      line-height: 1.6;
-    }
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-      background: white;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-    .header-section {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      margin-bottom: 30px;
-      border-bottom: 3px solid #003366;
-      padding-bottom: 15px;
-    }
-    .logo-img {
-      height: 80px;
-      width: auto;
-    }
-    .header-text h2 {
-      margin: 0;
-      border-bottom: none;
-      padding-bottom: 0;
-    }
-    h2, h3 { 
-      color: #003366; 
-      border-bottom: 2px solid #003366; 
-      padding-bottom: 10px; 
-      margin-top: 30px;
-    }
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; background-color: #f0f8ff; color: #333; line-height: 1.6; }
+    .container { max-width: 1100px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    .header-section { display: flex; align-items: center; gap: 20px; margin-bottom: 30px; border-bottom: 3px solid #003366; padding-bottom: 15px; }
+    .logo-img { height: 80px; width: auto; }
+    .header-text h2 { margin: 0; border-bottom: none; padding-bottom: 0; }
+    h2, h3 { color: #003366; border-bottom: 2px solid #003366; padding-bottom: 10px; margin-top: 30px; }
     h2:first-of-type { margin-top: 0; }
-    .input-row {
-      margin-bottom: 20px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    input { 
-      padding: 10px; 
-      border: 1px solid #b0c4de; 
-      border-radius: 4px; 
-      flex: 1;
-      min-width: 150px;
-    }
-    button { 
-      padding: 10px 20px; 
-      background-color: #003366; 
-      color: white; 
-      border: none; 
-      border-radius: 4px; 
-      cursor: pointer; 
-      font-weight: 600;
-      transition: background-color 0.2s, transform 0.1s;
-    }
-    button:hover { 
-      background-color: #00509d; 
-    }
-    button:active {
-      transform: translateY(1px);
-    }
-    .export-btn {
-      background-color: #2e8b57;
-      margin-left: auto;
-    }
-    .export-btn:hover {
-      background-color: #3cb371;
-    }
-    table { 
-      border-collapse: collapse; 
-      width: 100%; 
-      margin-top: 20px; 
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    th, td { 
-      padding: 15px; 
-      text-align: left; 
-      border-bottom: 1px solid #e1e8ed;
-    }
-    th { 
-      background-color: #003366; 
-      color: white; 
-      font-weight: 600;
-      text-transform: uppercase;
-      font-size: 0.9em;
-      letter-spacing: 1px;
-    }
-    tr:nth-child(even) { 
-      background-color: #f8fbff; 
-    }
-    tr:hover {
-      background-color: #eef6ff;
-    }
-    .low { 
-      background-color: #fff0f0 !important; 
-      color: #d32f2f; 
-      font-weight: bold; 
-    }
-    .status-badge {
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 0.85em;
-      font-weight: 500;
-    }
-    .status-available {
-      background-color: #e8f5e9;
-      color: #2e7d32;
-    }
-    .status-low {
-      background-color: #ffebee;
-      color: #c62828;
-    }
-    .catalog-section, .usage-section {
-      background: #f8fbff;
-      padding: 20px;
-      border-radius: 8px;
-      border: 1px solid #b0c4de;
-      margin-bottom: 30px;
-    }
-    .section-header {
-      color: #003366;
-      margin-top: 0;
-      margin-bottom: 20px;
-      font-size: 1.4em;
-      border-bottom: 2px solid #003366;
-      padding-bottom: 8px;
-    }
+    .input-row { display: flex; gap: 10px; margin-bottom: 10px; width: 100%; }
+    input, select { padding: 10px; border: 1px solid #b0c4de; border-radius: 4px; flex: 1; min-width: 120px; }
+    button { padding: 10px 20px; background-color: #003366; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; transition: background-color 0.2s; }
+    button:hover { background-color: #00509d; }
+    .catalog-section, .usage-section { background: #f8fbff; padding: 20px; border-radius: 8px; border: 1px solid #b0c4de; margin-bottom: 30px; }
+    .section-header { color: #003366; margin-top: 0; margin-bottom: 20px; font-size: 1.4em; border-bottom: 2px solid #003366; padding-bottom: 8px; }
+    .input-hint { font-size: 0.75em; color: #888; margin-top: 4px; }
+    .loading { text-align: center; padding: 40px; color: #666; font-size: 1.1em; }
+    .sync-status { font-size: 0.8em; color: #888; text-align: right; margin-top: 5px; }
+    @media print { .no-print { display: none; } }
   </style>
 </head>
 <body>
@@ -149,26 +33,25 @@
     <img src="CoopVet.png" alt="CoopVet Logo" class="logo-img">
     <div class="header-text">
       <h2>Medical Stock Management <span id="totalCount" style="font-size: 0.5em; vertical-align: middle; background: #003366; color: white; padding: 5px 10px; border-radius: 20px; margin-left: 10px;">0 Medications</span></h2>
+      <div class="sync-status">🔄 Live sync with database</div>
     </div>
   </div>
 
-  <div class="catalog-section">
+  <div class="catalog-section no-print">
     <h3 class="section-header">Stock Cataloging</h3>
     <div class="input-row">
       <input type="text" id="medName" placeholder="Medication Name (e.g. Paracetamol)">
-      <select id="medUnit" style="padding: 10px; border: 1px solid #b0c4de; border-radius: 4px; flex: 0.5;">
+      <select id="medUnit" style="flex: 0.4;">
         <option value="pills">Pills/Tablets</option>
         <option value="ml">ml</option>
         <option value="vials">Vials</option>
       </select>
     </div>
-    
-    <div id="packagingInputs" class="input-row">
+    <div class="input-row">
       <input type="number" step="0.01" id="numBoxes" placeholder="Total Boxes">
-      <input type="number" step="0.01" id="cardsPerBox" placeholder="Cards/Bottles per Box">
-      <input type="number" step="0.01" id="unitsPerCard" placeholder="Pills per Card or ml per Bottle">
+      <input type="number" step="0.01" id="packsPerBox" placeholder="Cards/Bottles per Box">
+      <input type="number" step="0.01" id="unitsPerPack" placeholder="Pills per Card or ml per Bottle">
     </div>
-
     <div class="input-row">
       <input type="number" step="0.01" id="minRequired" placeholder="Min. Required Boxes (Monthly)">
       <button onclick="addStock()" style="flex: 1;">Add to Catalog</button>
@@ -176,12 +59,13 @@
         <button type="button" style="background-color: #00509d; width: 100%;">View Records</button>
       </a>
     </div>
+    <div class="input-hint">💡 For pills: Boxes → Cards per Box → Pills per Card. For ml: Boxes → Bottles per Box → ml per Bottle.</div>
   </div>
 
-  <div class="usage-section">
+  <div class="usage-section no-print">
     <h3 class="section-header">Usage Log</h3>
     <div class="input-row">
-      <select id="userName" style="padding: 10px; border: 1px solid #b0c4de; border-radius: 4px; flex: 1; min-width: 150px;">
+      <select id="userName">
         <option value="">Select Staff Name</option>
         <option value="Tito Estrongmane">Tito Estrongmane</option>
         <option value="Inacia Telma">Inacia Telma</option>
@@ -189,168 +73,131 @@
         <option value="Joyce Antunes">Joyce Antunes</option>
         <option value="Carmen do Rosario">Carmen do Rosario</option>
       </select>
-      <input type="date" id="dateUsed" style="flex: 0.5;">
+      <input type="date" id="dateUsed" style="flex: 0.6;">
     </div>
-    
     <div class="input-row">
-      <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 5px;">
-        <input type="text" id="medSearch" placeholder="Search medication..." onkeyup="filterMeds()" style="width: 600px;">
-        <select id="usedMed" style="padding: 10px; border: 1px solid #b0c4de; border-radius: 4px; width: 100%;">
+      <div style="flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 200px;">
+        <input type="text" id="medSearch" placeholder="Search medication..." oninput="filterMeds()">
+        <select id="usedMed" size="1" style="padding: 10px; border: 1px solid #b0c4de; border-radius: 4px; width: 100%;">
           <option value="">Select Medication</option>
         </select>
       </div>
       <input type="number" step="0.01" id="usedAmount" placeholder="Amount Used" style="flex: 0.5;">
     </div>
-    
     <div class="input-row">
       <button onclick="logUsage()" style="width: 100%;">Log Usage Entry</button>
     </div>
   </div>
+
+  <div id="loadingScreen" class="loading">🔄 Connecting to database...</div>
 </div>
 
 <script>
-// Set default date to today
-document.getElementById('dateUsed').valueAsDate = new Date();
+const SUPABASE_URL = 'https://uoxuuthnxhuaqqplizpl.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVveHV0aG54aHVhYXFxcGxpenBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk2MjY0MTYsImV4cCI6MjA2NTE0MjQxNn0.YW5ZL-BRZgA2cGMzMEc5s6e3VZ9q6MLxmpuRLMN7pB8';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let stock = JSON.parse(localStorage.getItem('medical_stock') || '[]');
-let usage = JSON.parse(localStorage.getItem('medical_usage') || '[]');
+let stock = [];
+let usage = [];
 
-// Initial render
-renderStock();
-renderUsage();
-
-function addStock() {
-  const nameInput = document.getElementById('medName');
-  const unitSelect = document.getElementById('medUnit');
-  const boxesInput = document.getElementById('numBoxes');
-  const packsInput = document.getElementById('cardsPerBox');
-  const unitsInput = document.getElementById('unitsPerCard');
-  const minInput = document.getElementById('minRequired');
-  
-  const name = nameInput.value;
-  const unit = unitSelect.value;
-  const boxes = parseFloat(boxesInput.value) || 0;
-  const packsPerBox = parseFloat(packsInput.value) || 1;
-  const unitsPerPack = parseFloat(unitsInput.value) || 0;
-  const minBoxes = parseFloat(minInput.value) || 0;
-  const totalUnits = boxes * packsPerBox * unitsPerPack;
-
-  if (!name || isNaN(totalUnits) || totalUnits <= 0) return alert("Please enter valid medication name and quantity");
-
-  stock.push({ 
-    name,
-    qty: parseFloat(totalUnits.toFixed(2)),
-    unit,
-    minBoxes,
-    packaging: {
-      packsPerBox,
-      unitsPerPack
-    }
-  });
-  
-  saveData();
-  renderStock();
-  
-  // Clear inputs
-  nameInput.value = "";
-  boxesInput.value = "";
-  cardsInput.value = "";
-  unitsInput.value = "";
-  minInput.value = "";
+async function init() {
+  document.getElementById('loadingScreen').style.display = 'block';
+  await loadData();
+  document.getElementById('loadingScreen').style.display = 'none';
 }
 
-function saveData() {
-  localStorage.setItem('medical_stock', JSON.stringify(stock));
-  localStorage.setItem('medical_usage', JSON.stringify(usage));
-}
-
-function renderStock() {
-  // Sort stock alphabetically by name
-  stock.sort((a, b) => a.name.localeCompare(b.name));
-  
-  // Initial populate of the dropdown
+async function loadData() {
+  const [stockRes, usageRes] = await Promise.all([
+    supabase.from('stock').select('*').order('name'),
+    supabase.from('usage_log').select('*').order('date', { ascending: false })
+  ]);
+  stock = stockRes.data || [];
+  usage = usageRes.data || [];
   filterMeds();
-  
   document.getElementById('totalCount').innerText = `${stock.length} Medications`;
 }
 
 function filterMeds() {
-  const search = document.getElementById('medSearch').value.toLowerCase();
+  const search = (document.getElementById('medSearch')?.value || '').toLowerCase();
   const medSelect = document.getElementById('usedMed');
-  
-  // Save current selection if any
-  const currentSelection = medSelect.value;
-  
+  if (!medSelect) return;
   medSelect.innerHTML = '<option value="">Select Medication</option>';
-
-  stock.forEach(item => {
-    if (item.name.toLowerCase().includes(search)) {
-      const useOption = document.createElement('option');
-      useOption.value = item.name;
-      useOption.textContent = item.name;
-      if (item.name === currentSelection) useOption.selected = true;
-      medSelect.appendChild(useOption);
-    }
+  stock.filter(s => s.name.toLowerCase().includes(search)).forEach(item => {
+    const opt = document.createElement('option');
+    opt.value = item.name;
+    opt.textContent = `${item.name} (${item.qty} ${item.unit || 'pills'})`;
+    medSelect.appendChild(opt);
   });
 }
 
-function logUsage() {
-  const userInput = document.getElementById('userName');
-  const medSelect = document.getElementById('usedMed');
-  const amountInput = document.getElementById('usedAmount');
-  const dateInput = document.getElementById('dateUsed');
-  
-  const user = userInput.value;
-  const medName = medSelect.value;
-  const amount = parseFloat(amountInput.value);
-  const date = dateInput.value;
+async function addStock() {
+  const name = document.getElementById('medName').value.trim();
+  const unit = document.getElementById('medUnit').value;
+  const boxes = parseFloat(document.getElementById('numBoxes').value) || 0;
+  const packsPerBox = parseFloat(document.getElementById('packsPerBox').value) || 1;
+  const unitsPerPack = parseFloat(document.getElementById('unitsPerPack').value) || 0;
+  const minBoxes = parseFloat(document.getElementById('minRequired').value) || 0;
+  const totalUnits = boxes * packsPerBox * unitsPerPack;
 
-  if (!user || !medName || isNaN(amount) || !date) return alert("Fill all fields correctly");
+  if (!name || totalUnits <= 0) return alert('Please enter a valid medication name and quantity');
 
-  // Find medication in stock and decrement quantity
-  const medIndex = stock.findIndex(item => item.name === medName);
-  if (medIndex === -1) return alert("Medication not found in stock");
-  
-  if (stock[medIndex].qty < amount) {
-    return alert(`Error: Not enough stock! Current: ${stock[medIndex].qty}${stock[medIndex].unit}`);
-  }
+  const existing = stock.find(s => s.name.toLowerCase() === name.toLowerCase());
+  if (existing) return alert('This medication already exists. Use the Usage Log to deduct stock.');
 
-  stock[medIndex].qty = parseFloat((stock[medIndex].qty - amount).toFixed(2));
-  usage.push({ 
-    user, 
-    med: medName, 
-    amount: amount,
-    unit: stock[medIndex].unit,
-    date 
-  });
-  
-  saveData();
-  renderStock(); // Refresh dropdown and alerts
-  
-  // Clear inputs
-  userInput.value = "";
-  medSelect.value = "";
-  document.getElementById('medSearch').value = ""; // Clear search
-  filterMeds(); // Reset dropdown visibility
-  amountInput.value = "";
-  document.getElementById('dateUsed').valueAsDate = new Date(); // Reset to today
+  const { error } = await supabase.from('stock').insert([{
+    name, unit, qty: parseFloat(totalUnits.toFixed(2)), min_boxes: minBoxes,
+    packs_per_box: packsPerBox, units_per_pack: unitsPerPack
+  }]);
+
+  if (error) return alert('Error adding stock: ' + error.message);
+
+  await loadData();
+
+  document.getElementById('medName').value = '';
+  document.getElementById('numBoxes').value = '';
+  document.getElementById('packsPerBox').value = '';
+  document.getElementById('unitsPerPack').value = '';
+  document.getElementById('minRequired').value = '';
 }
 
-function renderUsage() {
+async function logUsage() {
+  const user = document.getElementById('userName').value;
+  const medName = document.getElementById('usedMed').value;
+  const amount = parseFloat(document.getElementById('usedAmount').value);
+  const date = document.getElementById('dateUsed').value;
+
+  if (!user || !medName || !amount || !date) return alert('Fill all fields correctly');
+
+  const med = stock.find(s => s.name === medName);
+  if (!med) return alert('Medication not found');
+  if (med.qty < amount) return alert(`Not enough stock! Current: ${med.qty} ${med.unit}`);
+
+  const newQty = parseFloat((med.qty - amount).toFixed(2));
+
+  const [, usageRes] = await Promise.all([
+    supabase.from('stock').update({ qty: newQty }).eq('id', med.id),
+    supabase.from('usage_log').insert([{ staff_name: user, med: medName, amount, unit: med.unit, date }])
+  ]);
+
+  if (usageRes.error) return alert('Error logging usage: ' + usageRes.error.message);
+
+  await loadData();
+
+  document.getElementById('userName').value = '';
+  document.getElementById('usedMed').value = '';
+  document.getElementById('usedAmount').value = '';
+  document.getElementById('medSearch').value = '';
+  document.getElementById('dateUsed').valueAsDate = new Date();
 }
 
-function exportExcel() {
-  const wb = XLSX.utils.book_new();
+document.getElementById('dateUsed').valueAsDate = new Date();
 
-  const stockSheet = XLSX.utils.json_to_sheet(stock);
-  const usageSheet = XLSX.utils.json_to_sheet(usage);
+supabase.channel('db_changes')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'stock' }, () => loadData())
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'usage_log' }, () => loadData())
+  .subscribe();
 
-  XLSX.utils.book_append_sheet(wb, stockSheet, "Stock");
-  XLSX.utils.book_append_sheet(wb, usageSheet, "Usage");
-
-  XLSX.writeFile(wb, "medical_stock.xlsx");
-}
+init();
 </script>
-
 </body>
 </html>

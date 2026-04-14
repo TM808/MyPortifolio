@@ -3,297 +3,158 @@
 <head>
   <meta charset="UTF-8">
   <title>Doctor Medication Log - CoopVet</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding: 40px;
-      background-color: #f0f8ff;
-      color: #333;
-      line-height: 1.6;
-    }
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-      background: white;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 20px;
-      margin-bottom: 30px;
-      border-bottom: 3px solid #003366;
-      padding-bottom: 20px;
-    }
-    .logo-section {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-    .logo-img {
-      height: 70px;
-      width: auto;
-    }
-    .header-title {
-      color: #003366;
-      margin: 0;
-      font-size: 2rem;
-    }
-    .back-btn {
-      padding: 10px 20px;
-      background-color: #003366;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      text-decoration: none;
-      font-weight: 600;
-      transition: background-color 0.2s;
-    }
-    .back-btn:hover {
-      background-color: #00509d;
-    }
-    .form-card {
-      background: #f8fbff;
-      padding: 20px;
-      border-radius: 8px;
-      border: 1px solid #b0c4de;
-      margin-bottom: 25px;
-    }
-    h2, h3 {
-      color: #003366;
-      margin-top: 0;
-      margin-bottom: 15px;
-    }
-    .input-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-    input, select {
-      padding: 10px;
-      border: 1px solid #b0c4de;
-      border-radius: 4px;
-      flex: 1;
-      min-width: 180px;
-    }
-    button {
-      padding: 10px 20px;
-      background-color: #003366;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: background-color 0.2s;
-    }
-    button:hover {
-      background-color: #00509d;
-    }
-    .status-box {
-      background: #eef6ff;
-      border: 1px solid #b0c4de;
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 20px;
-    }
-    .success {
-      background: #e8f5e9;
-      border-color: #a5d6a7;
-      color: #2e7d32;
-    }
-    .error {
-      background: #ffebee;
-      border-color: #ef9a9a;
-      color: #c62828;
-    }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-top: 15px;
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    th, td {
-      padding: 14px;
-      text-align: left;
-      border-bottom: 1px solid #e1e8ed;
-    }
-    th {
-      background-color: #003366;
-      color: white;
-      font-weight: 600;
-      text-transform: uppercase;
-      font-size: 0.85em;
-      letter-spacing: 1px;
-    }
-    tr:nth-child(even) {
-      background-color: #f8fbff;
-    }
-    .small {
-      font-size: 0.9em;
-      color: #555;
-    }
-    .empty {
-      text-align: center;
-      color: #888;
-      padding: 20px;
-    }
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; background-color: #f0f8ff; color: #333; line-height: 1.6; }
+    .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    .header { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 30px; border-bottom: 3px solid #003366; padding-bottom: 20px; }
+    .logo-section { display: flex; align-items: center; gap: 15px; }
+    .logo-img { height: 70px; width: auto; }
+    .header-title { color: #003366; margin: 0; font-size: 2rem; }
+    .form-card { background: #f8fbff; padding: 20px; border-radius: 8px; border: 1px solid #b0c4de; margin-bottom: 25px; }
+    h2 { color: #003366; margin-top: 0; margin-bottom: 15px; }
+    .input-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+    input, select { padding: 10px; border: 1px solid #b0c4de; border-radius: 4px; flex: 1; min-width: 150px; }
+    button { padding: 10px 20px; background-color: #003366; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; transition: background-color 0.2s; }
+    button:hover { background-color: #00509d; }
+    .status-box { border-radius: 8px; padding: 16px; margin-bottom: 20px; display: none; font-weight: 500; }
+    .success { background: #e8f5e9; border: 1px solid #a5d6a7; color: #2e7d32; }
+    .error { background: #ffebee; border: 1px solid #ef9a9a; color: #c62828; }
+    .small { font-size: 0.85em; color: #555; margin-top: 6px; }
+    .loading { text-align: center; padding: 40px; color: #666; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <div class="logo-section">
-        <img src="CoopVet.png" alt="CoopVet Logo" class="logo-img">
-        <h1 class="header-title">Doctor Daily Medication Log</h1>
-      </div>
+
+<div class="container">
+  <div class="header">
+    <div class="logo-section">
+      <img src="CoopVet.png" alt="CoopVet Logo" class="logo-img">
+      <h1 class="header-title">Doctor Daily Medication Log</h1>
     </div>
-
-    <div id="messageBox" class="status-box" style="display: none;"></div>
-
-    <div class="form-card">
-      <h2>Log Medication Usage</h2>
-      <div class="input-row">
-        <select id="doctorName" style="padding: 10px; border: 1px solid #b0c4de; border-radius: 4px; flex: 1; min-width: 150px;">
-          <option value="">Select Staff Name</option>
-          <option value="Tito Estrongmane">Tito Estrongmane</option>
-          <option value="Inacia Telma">Inacia Telma</option>
-          <option value="Pedro Antunes">Pedro Antunes</option>
-          <option value="Joyce Antunes">Joyce Antunes</option>
-          <option value="Carmen do Rosario">Carmen do Rosario</option>
-        </select>
-        <div style="flex: 2; min-width: 250px; display: flex; flex-direction: column; gap: 5px;">
-          <input type="text" id="medSearch" placeholder="Search medication..." onkeyup="filterMeds()" style="width: 600px;">
-          <select id="usedMed" style="padding: 10px; border: 1px solid #b0c4de; border-radius: 4px; width: 100%;">
-            <option value="">Select Medication</option>
-          </select>
-        </div>
-      </div>
-      <div class="input-row">
-        <input type="number" step="0.01" id="usedAmount" placeholder="Amount Used">
-        <input type="date" id="dateUsed">
-        <button onclick="logUsage()">Save Daily Usage</button>
-      </div>
-      <div id="selectedMedInfo" class="small"></div>
-    </div>
-
   </div>
 
-  <script>
-    let stock = JSON.parse(localStorage.getItem('medical_stock') || '[]');
-    let usage = JSON.parse(localStorage.getItem('medical_usage') || '[]');
+  <div id="messageBox" class="status-box"></div>
 
-    document.getElementById('dateUsed').valueAsDate = new Date();
+  <div class="form-card">
+    <h2>Log Medication Usage</h2>
+    <div class="input-row">
+      <select id="doctorName">
+        <option value="">Select Staff Name</option>
+        <option value="Tito Estrongmane">Tito Estrongmane</option>
+        <option value="Inacia Telma">Inacia Telma</option>
+        <option value="Pedro Antunes">Pedro Antunes</option>
+        <option value="Joyce Antunes">Joyce Antunes</option>
+        <option value="Carmen do Rosario">Carmen do Rosario</option>
+      </select>
+      <input type="date" id="dateUsed">
+    </div>
+    <div class="input-row">
+      <div style="flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 200px;">
+        <input type="text" id="medSearch" placeholder="Search medication..." oninput="filterMeds()">
+        <select id="usedMed" style="padding: 10px; border: 1px solid #b0c4de; border-radius: 4px; width: 100%;">
+          <option value="">Select Medication</option>
+        </select>
+      </div>
+      <input type="number" step="0.01" id="usedAmount" placeholder="Amount Used" style="flex: 0.5;">
+    </div>
+    <button onclick="logUsage()" style="width: 100%; margin-top: 5px;">Save Daily Usage</button>
+    <div id="selectedMedInfo" class="small"></div>
+  </div>
 
-    function saveData() {
-      localStorage.setItem('medical_stock', JSON.stringify(stock));
-      localStorage.setItem('medical_usage', JSON.stringify(usage));
-    }
+  <div id="loadingScreen" class="loading">🔄 Connecting to database...</div>
+</div>
 
-    function showMessage(text, type) {
-      const box = document.getElementById('messageBox');
-      box.className = `status-box ${type}`;
-      box.textContent = text;
-      box.style.display = 'block';
-    }
+<script>
+const SUPABASE_URL = 'https://uoxuuthnxhuaqqplizpl.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVveHV0aG54aHVhYXFxcGxpenBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk2MjY0MTYsImV4cCI6MjA2NTE0MjQxNn0.YW5ZL-BRZgA2cGMzMEc5s6e3VZ9q6MLxmpuRLMN7pB8';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    function populateMedicationList() {
-      // Sort stock alphabetically
-      stock.sort((a, b) => a.name.localeCompare(b.name));
-      filterMeds();
-    }
+let stock = [];
 
-    function filterMeds() {
-      const search = document.getElementById('medSearch').value.toLowerCase();
-      const medSelect = document.getElementById('usedMed');
-      const currentSelection = medSelect.value;
-      
-      medSelect.innerHTML = '<option value="">Select Medication</option>';
+async function init() {
+  document.getElementById('loadingScreen').style.display = 'block';
+  const { data } = await supabase.from('stock').select('*').order('name');
+  stock = data || [];
+  filterMeds();
+  document.getElementById('loadingScreen').style.display = 'none';
+}
 
-      stock.forEach(item => {
-        if (item.name.toLowerCase().includes(search)) {
-          const option = document.createElement('option');
-          option.value = item.name;
-          option.textContent = `${item.name} (${item.qty} ${item.unit || 'pills'} left)`;
-          if (item.name === currentSelection) option.selected = true;
-          medSelect.appendChild(option);
-        }
-      });
-    }
+function filterMeds() {
+  const search = (document.getElementById('medSearch')?.value || '').toLowerCase();
+  const medSelect = document.getElementById('usedMed');
+  medSelect.innerHTML = '<option value="">Select Medication</option>';
+  stock.filter(s => s.name.toLowerCase().includes(search)).forEach(item => {
+    const opt = document.createElement('option');
+    opt.value = item.name;
+    opt.textContent = `${item.name} (${item.qty} ${item.unit || 'pills'} left)`;
+    medSelect.appendChild(opt);
+  });
+}
 
-    function updateMedicationInfo() {
-      const medName = document.getElementById('usedMed').value;
-      const info = document.getElementById('selectedMedInfo');
+function updateMedInfo() {
+  const info = document.getElementById('selectedMedInfo');
+  const med = stock.find(s => s.name === document.getElementById('usedMed').value);
+  if (!med) { info.textContent = ''; return; }
+  const ppb = med.packs_per_box || 1, upp = med.units_per_pack || 1;
+  const boxes = (ppb * upp) ? (med.qty / (ppb * upp)).toFixed(2) : med.qty;
+  info.textContent = `Available: ${med.qty} ${med.unit || 'pills'} | Boxes left: ${boxes} | Minimum required: ${med.min_boxes || 0} boxes`;
+}
 
-      if (!medName) {
-        info.textContent = '';
-        return;
-      }
+async function logUsage() {
+  const doctorName = document.getElementById('doctorName').value.trim();
+  const medName = document.getElementById('usedMed').value;
+  const amount = parseFloat(document.getElementById('usedAmount').value);
+  const date = document.getElementById('dateUsed').value;
+  const msgBox = document.getElementById('messageBox');
 
-      const med = stock.find(item => item.name === medName);
+  if (!doctorName || !medName || !amount || !date) {
+    msgBox.className = 'status-box error'; msgBox.textContent = 'Fill all fields correctly.'; msgBox.style.display = 'block'; return;
+  }
 
-      if (!med) {
-        info.textContent = '';
-        return;
-      }
+  const med = stock.find(s => s.name === medName);
+  if (!med) { msgBox.className = 'status-box error'; msgBox.textContent = 'Medication not found.'; msgBox.style.display = 'block'; return; }
+  if (med.qty < amount) { msgBox.className = 'status-box error'; msgBox.textContent = `Not enough stock. Current: ${med.qty} ${med.unit || 'pills'}.`; msgBox.style.display = 'block'; return; }
 
-      info.textContent = `Available stock: ${med.qty} ${med.unit || 'pills'} | Minimum required: ${med.min || 0}`;
-    }
+  const newQty = parseFloat((med.qty - amount).toFixed(2));
 
-    function logUsage() {
-      const doctorName = document.getElementById('doctorName').value.trim();
-      const medName = document.getElementById('usedMed').value;
-      const amount = parseFloat(document.getElementById('usedAmount').value);
-      const date = document.getElementById('dateUsed').value;
+  const [, , { error }] = await Promise.all([
+    supabase.from('stock').update({ qty: newQty }).eq('id', med.id),
+    supabase.from('usage_log').insert([{ staff_name: doctorName, med: medName, amount, unit: med.unit || 'pills', date }]),
+    supabase.from('stock').select('*').order('name')
+  ]);
 
-      if (!doctorName || !medName || isNaN(amount) || amount <= 0 || !date) {
-        showMessage('Fill all fields correctly.', 'error');
-        return;
-      }
+  if (error) { msgBox.className = 'status-box error'; msgBox.textContent = 'Error: ' + error.message; msgBox.style.display = 'block'; return; }
 
-      const medIndex = stock.findIndex(item => item.name === medName);
+  stock = stock.map(s => s.name === medName ? { ...s, qty: newQty } : s);
+  filterMeds();
+  updateMedInfo();
 
-      if (medIndex === -1) {
-        showMessage('Medication not found in stock.', 'error');
-        return;
-      }
+  document.getElementById('doctorName').value = '';
+  document.getElementById('usedMed').value = '';
+  document.getElementById('usedAmount').value = '';
+  document.getElementById('medSearch').value = '';
+  document.getElementById('dateUsed').valueAsDate = new Date();
 
-      if (stock[medIndex].qty < amount) {
-        showMessage(`Not enough stock. Current stock: ${stock[medIndex].qty} ${stock[medIndex].unit || 'pills'}.`, 'error');
-        return;
-      }
+  msgBox.className = 'status-box success';
+  msgBox.textContent = `${medName} logged successfully. Remaining stock: ${newQty} ${med.unit || 'pills'}.`;
+  msgBox.style.display = 'block';
+  setTimeout(() => { msgBox.style.display = 'none'; }, 4000);
+}
 
-      stock[medIndex].qty = parseFloat((stock[medIndex].qty - amount).toFixed(2));
+document.getElementById('dateUsed').valueAsDate = new Date();
+document.getElementById('usedMed').addEventListener('change', updateMedInfo);
+document.getElementById('medSearch').addEventListener('input', () => { filterMeds(); updateMedInfo(); });
 
-      usage.push({
-        user: doctorName,
-        med: medName,
-        amount: amount,
-        unit: stock[medIndex].unit || 'pills',
-        date: date
-      });
+supabase.channel('db_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'stock' }, async () => {
+  const { data } = await supabase.from('stock').select('*').order('name');
+  stock = data || [];
+  filterMeds();
+  updateMedInfo();
+}).subscribe();
 
-      saveData();
-      populateMedicationList();
-      updateMedicationInfo();
-
-      document.getElementById('doctorName').value = '';
-      document.getElementById('usedMed').value = '';
-      document.getElementById('medSearch').value = '';
-      document.getElementById('usedAmount').value = '';
-      document.getElementById('dateUsed').valueAsDate = new Date();
-
-      showMessage(`${medName} logged successfully. Remaining stock: ${stock[medIndex].qty} ${stock[medIndex].unit || 'pills'}.`, 'success');
-    }
-
-    document.getElementById('usedMed').addEventListener('change', updateMedicationInfo);
-
-    populateMedicationList();
-  </script>
+init();
+</script>
 </body>
 </html>
