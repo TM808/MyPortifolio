@@ -127,19 +127,34 @@ function renderStock(stock) {
     const upp = item.units_per_pack || 1;
     const totalPerBox = ppb * upp;
     const currentBoxes = totalPerBox ? item.qty / totalPerBox : 0;
-    const wholeBoxes = totalPerBox ? Math.floor(currentBoxes) : 0;
-    const remaining = totalPerBox ? item.qty - wholeBoxes * totalPerBox : item.qty;
-    const packLabel = item.unit === 'ml' ? 'Bottle(s)' : 'Card(s)';
-    const packsLeft = upp ? Math.floor(remaining / upp) : 0;
-    const loose = upp ? remaining - packsLeft * upp : remaining;
-    const breakdown = item.unit === 'ml'
-      ? `${fqty(wholeBoxes)} Box(es) ${fqty(remaining)} ml`
-      : `${fqty(wholeBoxes)} Box(es) ${fqty(packsLeft)} ${packLabel} ${fqty(loose)} ${item.unit || 'units'}`;
+    
+    // Calculate breakdown
+    const wholeBoxes = Math.floor(currentBoxes);
+    const remainingAfterBoxes = item.qty - (wholeBoxes * totalPerBox);
+    const wholePacks = Math.floor(remainingAfterBoxes / upp);
+    const looseUnits = parseFloat((remainingAfterBoxes - (wholePacks * upp)).toFixed(2));
+
+    let breakdown = `${fqty(wholeBoxes)} Box(es)`;
+    if (ppb > 1 || upp > 1) {
+      const packLabel = item.unit === 'ml' ? 'Bottle(s)' : 'Card(s)';
+      breakdown += `, ${fqty(wholePacks)} ${packLabel}, ${fqty(looseUnits)} ${item.unit || 'units'}`;
+    }
 
     let status = 'Adequate', statusClass = 'status-green';
-    if (currentBoxes <= minBoxes * 0.1) { status = 'Critical (Red)'; statusClass = 'status-red'; lowStockMeds.push(`${item.name} (${fqty(currentBoxes)}/${fqty(minBoxes)} boxes)`); }
-    else if (currentBoxes <= minBoxes * 0.5) { status = 'Low (Yellow)'; statusClass = 'status-yellow'; lowStockMeds.push(`${item.name} (${fqty(currentBoxes)}/${fqty(minBoxes)} boxes)`); }
-    else if (currentBoxes >= minBoxes) { status = 'Ideal (Green)'; statusClass = 'status-green'; }
+    if (currentBoxes <= minBoxes * 0.1) { 
+      status = 'Critical (Red)'; 
+      statusClass = 'status-red'; 
+      lowStockMeds.push(item.name); 
+    }
+    else if (currentBoxes <= minBoxes * 0.5) { 
+      status = 'Low (Yellow)'; 
+      statusClass = 'status-yellow'; 
+      lowStockMeds.push(item.name); 
+    }
+    else if (currentBoxes >= minBoxes) { 
+      status = 'Ideal (Green)'; 
+      statusClass = 'status-green'; 
+    }
 
     tbody.innerHTML += `<tr>
       <td><strong>${item.name}</strong></td>

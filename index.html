@@ -135,29 +135,42 @@ async function addStock() {
   const unit = document.getElementById('medUnit').value;
   const boxes = parseFloat(document.getElementById('numBoxes').value) || 0;
   const packsPerBox = parseFloat(document.getElementById('packsPerBox').value) || 1;
-  const unitsPerPack = parseFloat(document.getElementById('unitsPerPack').value) || 0;
+  const unitsPerPack = parseFloat(document.getElementById('unitsPerPack').value) || 1;
   const minBoxes = parseFloat(document.getElementById('minRequired').value) || 0;
+  
+  if (!name) return alert('Please enter a medication name');
+  if (boxes <= 0) return alert('Please enter a valid number of boxes');
+  
   const totalUnits = boxes * packsPerBox * unitsPerPack;
 
-  if (!name || totalUnits <= 0) return alert('Please enter a valid medication name and quantity');
+  if (totalUnits <= 0) return alert('Invalid quantity calculation. Please check your inputs.');
 
   const existing = stock.find(s => s.name.toLowerCase() === name.toLowerCase());
   if (existing) return alert('This medication already exists. Use the Usage Log to deduct stock.');
 
   const { error } = await supabase.from('stock').insert([{
-    name, unit, qty: parseFloat(totalUnits.toFixed(2)), min_boxes: minBoxes,
-    packs_per_box: packsPerBox, units_per_pack: unitsPerPack
+    name, 
+    unit, 
+    qty: parseFloat(totalUnits.toFixed(2)), 
+    min_boxes: minBoxes,
+    packs_per_box: packsPerBox, 
+    units_per_pack: unitsPerPack
   }]);
 
-  if (error) return alert('Error adding stock: ' + error.message);
+  if (error) {
+    console.error('Add stock error:', error);
+    return alert('Error adding stock: ' + error.message);
+  }
 
   await loadData();
 
+  // Clear fields
   document.getElementById('medName').value = '';
   document.getElementById('numBoxes').value = '';
   document.getElementById('packsPerBox').value = '';
   document.getElementById('unitsPerPack').value = '';
   document.getElementById('minRequired').value = '';
+  alert('Medication added successfully!');
 }
 
 async function logUsage() {
@@ -174,12 +187,20 @@ async function logUsage() {
 
   const newQty = parseFloat((med.qty - amount).toFixed(2));
 
-  const [, usageRes] = await Promise.all([
-    supabase.from('stock').update({ qty: newQty }).eq('id', med.id),
-    supabase.from('usage_log').insert([{ staff_name: user, med: medName, amount, unit: med.unit, date }])
-  ]);
+  // Update stock first
+  const { error: stockError } = await supabase.from('stock').update({ qty: newQty }).eq('id', med.id);
+  if (stockError) return alert('Error updating stock: ' + stockError.message);
 
-  if (usageRes.error) return alert('Error logging usage: ' + usageRes.error.message);
+  // Then log usage
+  const { error: usageError } = await supabase.from('usage_log').insert([{ 
+    staff_name: user, 
+    med: medName, 
+    amount, 
+    unit: med.unit, 
+    date 
+  }]);
+  
+  if (usageError) return alert('Error logging usage: ' + usageError.message);
 
   await loadData();
 
@@ -188,6 +209,7 @@ async function logUsage() {
   document.getElementById('usedAmount').value = '';
   document.getElementById('medSearch').value = '';
   document.getElementById('dateUsed').valueAsDate = new Date();
+  alert('Usage logged successfully!');
 }
 
 document.getElementById('dateUsed').valueAsDate = new Date();
