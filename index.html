@@ -229,6 +229,37 @@ supabase.channel('db_changes')
   .subscribe();
 
 init();
+
+// ... inside addStock(event) ...
+    alert('Step 1: Checking inputs...');
+    if (!name) return alert('Please enter a medication name');
+    if (boxes <= 0) return alert('Please enter a valid number of boxes');
+    
+    const totalUnits = boxes * packsPerBox * unitsPerPack;
+    alert('Step 2: Calculated ' + totalUnits + ' total units. Sending to Database...');
+
+    btn.disabled = true;
+    btn.innerText = 'Adding...';
+
+    // This is the part that might be hanging
+    const { data, error } = await supabase.from('stock').insert([{
+      name, 
+      unit, 
+      qty: parseFloat(totalUnits.toFixed(2)), 
+      min_boxes: minBoxes,
+      packs_per_box: packsPerBox, 
+      units_per_pack: unitsPerPack
+    }]);
+
+    if (error) {
+      alert('DATABASE ERROR: ' + error.message);
+      throw error;
+    }
+
+    alert('Step 3: Database accepted the data! Refreshing list...');
+    await loadData();
+    alert('Medication added successfully!');
+// ...
 </script>
 </body>
 </html>
