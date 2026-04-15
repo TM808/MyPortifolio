@@ -102,8 +102,14 @@ let usage = [];
 
 async function init() {
   document.getElementById('loadingScreen').style.display = 'block';
-  await loadData();
-  document.getElementById('loadingScreen').style.display = 'none';
+  try {
+    await loadData();
+  } catch (err) {
+    console.error('Initialization error:', err);
+    alert('Failed to connect to database. Please check your console for errors.');
+  } finally {
+    document.getElementById('loadingScreen').style.display = 'none';
+  }
 }
 
 async function loadData() {
