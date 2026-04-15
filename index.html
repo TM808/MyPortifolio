@@ -54,7 +54,7 @@
     </div>
     <div class="input-row">
       <input type="number" step="0.01" id="minRequired" placeholder="Min. Required Boxes (Monthly)">
-      <button onclick="addStock()" style="flex: 1;">Add to Catalog</button>
+      <button onclick="addStock(event)" style="flex: 1;">Add to Catalog</button>
       <a href="records.html" style="text-decoration: none;">
         <button type="button" style="background-color: #00509d; width: 100%;">View Records</button>
       </a>
@@ -67,7 +67,7 @@
     <div class="input-row">
       <select id="userName">
         <option value="">Select Staff Name</option>
-        <option value="Tito Estrongmane">Tito Estrongmane</option>
+        <option value="Tito Estrongomane">Tito Estrongomane</option>
         <option value="Inacia Telma">Inacia Telma</option>
         <option value="Pedro Antunes">Pedro Antunes</option>
         <option value="Joyce Antunes">Joyce Antunes</option>
@@ -136,7 +136,10 @@ function filterMeds() {
   });
 }
 
-async function addStock() {
+async function addStock(event) {
+  console.log('addStock button clicked');
+  const btn = event ? event.target : null;
+  const originalText = btn ? btn.innerText : 'Add to Catalog';
   const name = document.getElementById('medName').value.trim();
   const unit = document.getElementById('medUnit').value;
   const boxes = parseFloat(document.getElementById('numBoxes').value) || 0;
